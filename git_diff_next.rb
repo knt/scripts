@@ -17,6 +17,6 @@ tracked_files.split("\n").each do |tracked_file|
 
   next if index_status == MODIFIED
 
-  `echo git add #{file_name} | tr -d '\n' | pbcopy`
+  `echo #{file_name} | tr -d '\n' | pbcopy`
   exec "git diff #{file_name}"
 end
