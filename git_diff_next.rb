@@ -1,3 +1,11 @@
+##############
+# Git-Diff-Next
+##############
+#
+# A script for my current git workflow
+# - For each untracked change, do a git diff on the file
+# - Add 'git add' for that file onto the clipboard
+
 MODIFIED = "M"
 
 tracked_files = `git status --untracked-files=no --short`
