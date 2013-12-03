@@ -1,21 +1,27 @@
+#!/usr/bin/env ruby
+
 ##############
 # Git-Diff-Next
 ##############
 #
 # A script for my current git workflow
-# - For each untracked change, do a git diff on the file
-# - Add 'git add' for that file onto the clipboard
+# - For each change, do a git diff on the file
+# - Add the filename to the clipboard, for quick git adding or other git commanding
 #
 # Git Status Documentation: https://www.kernel.org/pub/software/scm/git/docs/git-status.html
-
+#
+# TO-DO: This currently doesnt work for unmerged changes
+# TO-DO: Can be cleaned up heavily after I read the Command Line tools book
+#
 
 def git_diff_next
   unstaged_git_files.each do |unstaged_file|
-   next unless unstaged_file.has_unstaged_changes?
-
-    # if unstaged_file.untracked?
-    #   `echo "UNTRACKED FILE #{unstaged_file.filename}"`
-    # end
+    if unstaged_file.untracked?
+      # TODO: For some reason an echo here wouldn't work...why?
+      puts "UNTRACKED FILE #{unstaged_file.filename}"
+    elsif !unstaged_file.has_unstaged_changes?
+      next
+    end
 
    `echo #{unstaged_file.filename} | tr -d '\n' | pbcopy`
    exec "git diff #{unstaged_file.filename}"
@@ -52,7 +58,7 @@ class GitFile
   end
 
   def has_unstaged_changes?
-    @work_tree_status != UNMODIFIED_STATUS
+    [MODIFIED_STATUS, DELETED_STATUS].include?(@work_tree_status)
   end
 end
 
