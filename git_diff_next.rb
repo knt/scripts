@@ -11,20 +11,25 @@
 # Git Status Documentation: https://www.kernel.org/pub/software/scm/git/docs/git-status.html
 #
 # TO-DO: This currently doesnt work for unmerged changes
+# TO-DO: Need some way to cycle through files, so I can skip a change
 # TO-DO: Can be cleaned up heavily after I read the Command Line tools book
-#
 
 def git_diff_next
   unstaged_git_files.each do |unstaged_file|
     if unstaged_file.untracked?
-      # TODO: For some reason an echo here wouldn't work...why?
-      puts "UNTRACKED FILE #{unstaged_file.filename}"
+      `echo UNTRACKED FILE #{unstaged_file.filename} >&2`
+      copy_to_clipboard(unstaged_file)
+      break
+    elsif unstaged_file.deleted?
+      `echo DELETED FILE #{unstaged_file.filename} >&2`
+      copy_to_clipboard(unstaged_file)
+      break
     elsif !unstaged_file.has_unstaged_changes?
       next
+    else
+      copy_to_clipboard(unstaged_file)
+      exec "git diff #{unstaged_file.filename}"
     end
-
-   `echo #{unstaged_file.filename} | tr -d '\n' | pbcopy`
-   exec "git diff #{unstaged_file.filename}"
   end
 end
 
@@ -33,6 +38,10 @@ def unstaged_git_files(show_untracked = true)
 
   files = `git status --untracked-files=#{tracked_flag} --short`
   files.split("\n").map { |file| GitFile.new(file)}
+end
+
+def copy_to_clipboard(git_file)
+  `echo #{git_file.filename} | tr -d '\n' | pbcopy`
 end
 
 
@@ -55,6 +64,10 @@ class GitFile
 
   def untracked?
     @work_tree_status == UNTRACKED_STATUS
+  end
+
+  def deleted?
+    @work_tree_status == DELETED_STATUS
   end
 
   def has_unstaged_changes?
