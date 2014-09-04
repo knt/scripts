@@ -41,7 +41,7 @@ def unstaged_git_files(show_untracked = true)
 end
 
 def copy_to_clipboard(git_file)
-  `echo #{git_file.filename} | tr -d '\n' | pbcopy`
+  `echo "\\\"#{git_file.filename}\\\"" | tr -d '\n' | pbcopy`
 end
 
 
@@ -59,7 +59,7 @@ class GitFile
   def initialize(git_file_status)
     @index_status = git_file_status[0]
     @work_tree_status = git_file_status[1]
-    @filename = git_file_status.split(" ")[1]
+    @filename = git_file_status.split(' ', 2).last
   end
 
   def untracked?
